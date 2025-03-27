@@ -15,7 +15,8 @@ CORS(app)
 @app.route('/search', methods=['GET'])
 def search_operadoras():
     """
-    Rota que realiza busca textual nas operadoras.
+    Rota que realiza busca textual nas operadoras com paginação.
+    Retorna resultados paginados junto com metadados.
     """
     query = request.args.get('query', '')
     page = int(request.args.get('page', 1))
@@ -23,6 +24,9 @@ def search_operadoras():
     
     if not query:
         abort(400, description="O parâmetro 'query' é obrigatório")
+    
+    if page < 1 or size < 1:
+        abort(400, description="Parâmetros 'page' e 'size' devem ser maiores que zero")
     
     ts_query = ' & '.join(query.split())
     
@@ -42,19 +46,30 @@ def search_operadoras():
         LIMIT :limit;
     """)
     
+    sql_count = text("""
+        SELECT COUNT(*) as total
+        FROM operadoras o
+        WHERE to_tsvector(coalesce(razao_social, '') || ' ' || coalesce(nome_fantasia, ''))
+              @@ to_tsquery(:ts_query)
+    """)
+    
     offset = (page - 1) * size
     with SessionLocal() as session:
         result = session.execute(sql, {'ts_query': ts_query, 'offset': offset, 'limit': size}).fetchall()
-        if not result:
-            return jsonify({"error": "Nenhum registro encontrado"}), 404
         
-        operadoras = []
-        for row in result:
-            operadora = {key: value for key, value in row._mapping.items() if key != 'rank'}
-            operadoras.append(operadora)
+        total = session.execute(sql_count, {'ts_query': ts_query}).scalar()
         
-        return jsonify(operadoras)
+        operadoras = [
+            {key: value for key, value in row._mapping.items() if key != 'rank'}
+            for row in result
+        ]
+        
+        return jsonify({
+            "results": operadoras,
+            "total": total,
+            "page": page,
+            "size": size
+        })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
-
