@@ -15,9 +15,12 @@ CORS(app)
 @app.route('/search', methods=['GET'])
 def search_operadoras():
     """
-    Rota que realiza busca textual nas operadoras utilizando full-text search.
+    Rota que realiza busca textual nas operadoras.
     """
     query = request.args.get('query', '')
+    page = int(request.args.get('page', 1))
+    size = int(request.args.get('size', 10))
+    
     if not query:
         abort(400, description="O parâmetro 'query' é obrigatório")
     
@@ -35,11 +38,13 @@ def search_operadoras():
         WHERE to_tsvector(coalesce(razao_social, '') || ' ' || coalesce(nome_fantasia, ''))
               @@ to_tsquery(:ts_query)
         ORDER BY rank DESC
-        LIMIT 10;
+        OFFSET :offset
+        LIMIT :limit;
     """)
     
+    offset = (page - 1) * size
     with SessionLocal() as session:
-        result = session.execute(sql, {'ts_query': ts_query}).fetchall()
+        result = session.execute(sql, {'ts_query': ts_query, 'offset': offset, 'limit': size}).fetchall()
         if not result:
             return jsonify({"error": "Nenhum registro encontrado"}), 404
         
