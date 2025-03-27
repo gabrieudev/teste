@@ -2,6 +2,7 @@ import requests
 import os
 import zipfile
 import io
+import pandas as pd
 
 def download_ans_data():
     base_url = "https://dadosabertos.ans.gov.br/FTP/PDA/"
@@ -26,10 +27,13 @@ def download_ans_data():
                 for file in zipf.namelist():
                     if file.endswith(".csv"):
                         with zipf.open(file) as csvfile:
-                            with open(os.path.join(csv_dir, file), "wb") as f:
-                                f.write(csvfile.read())
+                            df = pd.read_csv(csvfile, sep=";")
+                            df["VL_SALDO_INICIAL"] = df["VL_SALDO_INICIAL"].str.replace(",", ".")
+                            df["VL_SALDO_FINAL"] = df["VL_SALDO_FINAL"].str.replace(",", ".")
+                            df.to_csv(os.path.join(csv_dir, file), index=False, sep=";")
     
     print("Arquivos baixados e extraídos com sucesso!")
 
 if __name__ == "__main__":
     download_ans_data()
+
