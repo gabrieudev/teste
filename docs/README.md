@@ -39,9 +39,11 @@
 ├── frontend/                 # Interface Vue.js (Teste 4)
 │   ├── src/
 │   │   ├── components/       # Componentes Vue
+│   │   ├── types/            # Interface de operadora
 │   │   ├── views/            # Páginas
 │   │   ├── router/           # Rotas
-│   │   ├── assets/           # CSS, imagens
+│   │   ├── assets/           # SCSS
+│   │   ├── plugins/          # Vuetify
 │   │   └── App.vue
 │   ├── package.json          # Dependências Vue.js
 │   ├── vite.config.js        # Configuração do Vite
