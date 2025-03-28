@@ -1,5 +1,5 @@
 import pdfplumber
-import pandas as pd
+import csv
 import zipfile
 import os
 
@@ -10,19 +10,22 @@ def pdf_to_csv():
         csv_path = os.path.join(base_dir, '../../data/csv/dados.csv')
         zip_path = os.path.join(base_dir, '../../data/zip/Teste_Gabriel.zip')
 
-        all_data = []
-        with pdfplumber.open(pdf_path) as pdf:
+        os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+        with pdfplumber.open(pdf_path) as pdf, open(csv_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            writer = None
+            header_written = False
+
             for page in pdf.pages:
                 table = page.extract_table()
                 if table:
-                    all_data.extend(table[1:])
-
-        df = pd.DataFrame(all_data, columns=table[0])
-        df.columns = [col.replace('OD', 'Seg. Odontológica').replace('AMB', 'Seg. Ambulatorial') 
-                     for col in df.columns]
-
-        os.makedirs(os.path.dirname(csv_path), exist_ok=True)
-        df.to_csv(csv_path, index=False, encoding='utf-8-sig')
+                    if not header_written:
+                        header = table[0]
+                        header = [col.replace('OD', 'Seg. Odontológica').replace('AMB', 'Seg. Ambulatorial') for col in header]
+                        writer = csv.writer(csvfile)
+                        writer.writerow(header)
+                        header_written = True
+                    for row in table[1:]:
+                        writer.writerow(row)
 
         os.makedirs(os.path.dirname(zip_path), exist_ok=True)
         with zipfile.ZipFile(zip_path, 'w') as zipf:

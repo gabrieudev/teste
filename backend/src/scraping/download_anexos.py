@@ -56,8 +56,6 @@ def download_anexos():
                 else:
                     print(f"Aviso: {pdf_file} não encontrado para compactação")
 
-        print("Processo concluído com sucesso!")
-
     except Exception as e:
         print(f"Erro crítico: {str(e)}")
         exit(1)
