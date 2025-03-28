@@ -1,0 +1,17 @@
+@use 'vuetify/styles';
+@import '@mdi/font/css/materialdesignicons.css';
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
