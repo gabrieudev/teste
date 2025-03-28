@@ -1,75 +1,11 @@
-from flask import Flask, request, jsonify, abort
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from flask import Flask
 from flask_cors import CORS
-import os
-
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db/teste")
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from .routes import operadoras_bp
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/search', methods=['GET'])
-def search_operadoras():
-    """
-    Rota que realiza busca textual nas operadoras com paginação.
-    Retorna resultados paginados junto com metadados.
-    """
-    query = request.args.get('query', '')
-    page = int(request.args.get('page', 1))
-    size = int(request.args.get('size', 10))
-    
-    if not query:
-        abort(400, description="O parâmetro 'query' é obrigatório")
-    
-    if page < 1 or size < 1:
-        abort(400, description="Parâmetros 'page' e 'size' devem ser maiores que zero")
-    
-    ts_query = ' & '.join(query.split())
-    
-    sql = text("""
-        SELECT 
-            o.*,
-            ts_rank_cd(
-                setweight(to_tsvector(coalesce(razao_social, '')), 'A') ||
-                setweight(to_tsvector(coalesce(nome_fantasia, '')), 'B'),
-                to_tsquery(:ts_query)
-            ) AS rank
-        FROM operadoras o
-        WHERE to_tsvector(coalesce(razao_social, '') || ' ' || coalesce(nome_fantasia, ''))
-              @@ to_tsquery(:ts_query)
-        ORDER BY rank DESC
-        OFFSET :offset
-        LIMIT :limit;
-    """)
-    
-    sql_count = text("""
-        SELECT COUNT(*) as total
-        FROM operadoras o
-        WHERE to_tsvector(coalesce(razao_social, '') || ' ' || coalesce(nome_fantasia, ''))
-              @@ to_tsquery(:ts_query)
-    """)
-    
-    offset = (page - 1) * size
-    with SessionLocal() as session:
-        result = session.execute(sql, {'ts_query': ts_query, 'offset': offset, 'limit': size}).fetchall()
-        
-        total = session.execute(sql_count, {'ts_query': ts_query}).scalar()
-        
-        operadoras = [
-            {key: value for key, value in row._mapping.items() if key != 'rank'}
-            for row in result
-        ]
-        
-        return jsonify({
-            "results": operadoras,
-            "total": total,
-            "page": page,
-            "size": size
-        })
+app.register_blueprint(operadoras_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
