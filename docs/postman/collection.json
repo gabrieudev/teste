@@ -1,0 +1,147 @@
+{
+	"info": {
+		"_postman_id": "e7184e35-6b23-4990-af06-cf5186ad44c5",
+		"name": "Servidor",
+		"description": "## ⚙️ Configuração\n\n### **Variáveis de Ambiente**\n\n| Variável | Valor Exemplo | Descrição |\n| --- | --- | --- |\n| base_url | [http://localhost:8000](http://localhost:8000) | URL base da API |\n| query | saúde | Query padrão para testes |\n| page | 1 | Número da página |\n| size | 10 | Número de elementos por página |\n\n## 🗂️ Documentação  \n\nRepositório dos testes de nivelamento: [https://github.com/gabrieudev/teste](https://github.com/gabrieudev/teste)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43537733",
+		"_collection_link": "https://www.postman.com/descent-module-astronomer-92107099/workspace/collection-teste/collection/43537733-e7184e35-6b23-4990-af06-cf5186ad44c5?action=share&source=collection_link&creator=43537733"
+	},
+	"item": [
+		{
+			"name": "Requisições",
+			"item": [
+				{
+					"name": "Buscar operadoras",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Resposta válida e coerente com os parâmetros\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\r",
+									"    const expectedQuery = pm.variables.get(\"query\");\r",
+									"    const expectedPage = parseInt(pm.variables.get(\"page\"), 10);\r",
+									"    const expectedSize = parseInt(pm.variables.get(\"size\"), 10);\r",
+									"\r",
+									"    pm.expect(response).to.be.an(\"object\");\r",
+									"    pm.expect(response).to.have.property(\"results\").that.is.an(\"array\");\r",
+									"    pm.expect(response).to.have.property(\"page\").that.is.a(\"number\");\r",
+									"    pm.expect(response).to.have.property(\"size\").that.is.a(\"number\");\r",
+									"    pm.expect(response).to.have.property(\"total\").that.is.a(\"number\");\r",
+									"\r",
+									"    pm.expect(response.page).to.equal(expectedPage);\r",
+									"    pm.expect(response.size).to.equal(expectedSize);\r",
+									"\r",
+									"    pm.expect(response.results.length).to.be.at.most(expectedSize);\r",
+									"\r",
+									"    if (expectedQuery) {\r",
+									"        response.results.forEach(item => {\r",
+									"            const searchFields = [\r",
+									"                item.nome_fantasia,\r",
+									"                item.razao_social,\r",
+									"                item.modalidade\r",
+									"            ].join(\" \").toLowerCase();\r",
+									"\r",
+									"            pm.expect(searchFields).to.include(expectedQuery.toLowerCase());\r",
+									"        });\r",
+									"    }\r",
+									"\r",
+									"    response.results.forEach(item => {\r",
+									"        pm.expect(item).to.have.property(\"bairro\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"cidade\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"cnpj\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"logradouro\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"modalidade\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"nome_fantasia\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"registro_ans\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"telefone\").that.is.a(\"string\");\r",
+									"        pm.expect(item).to.have.property(\"uf\").that.is.a(\"string\");\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/search?query={{query}}&page={{page}}&size={{size}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "{{query}}"
+								},
+								{
+									"key": "page",
+									"value": "{{page}}"
+								},
+								{
+									"key": "size",
+									"value": "{{size}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### **🔗 GET /search**\n\n- **Descrição**: Realiza busca textual nas operadoras com paginação.\n    \n- **Método**: GET\n    \n- **URL**: `{{base_url}}/search`\n    \n- **Parâmetros**:\n    \n    - Query Params:\n        \n        - query: string (obrigatório)\n            \n        - page: integer (obrigatório, padrão: 1)\n            \n        - size: integer (obrigatório, padrão: 5)\n            \n\n#### **Exemplos de Requests**\n\n| Descrição | URL de Exemplo |\n| --- | --- |\n| Busca com paginação | {{base_url}}/search?query=saúde&page=2&size=5 |\n\n#### **Response (200 OK)**\n\n``` json\n{\n    \"page\": 1,\n    \"results\": [\n        {\n            \"bairro\": \"SETOR BUENO\",\n            \"cargo_representante\": \"DIRETOR GERAL\",\n            \"cep\": \"74215025\",\n            \"cidade\": \"Goiânia\",\n            \"cnpj\": \"00395266000180\",\n            \"complemento\": \"QD 87, LOTE 23, SALAS 1a4\",\n            \"data_registro_ans\": \"Mon, 06 Dec 2004 00:00:00 GMT\",\n            \"ddd\": \"62\",\n            \"endereco_eletronico\": \"elias@maissaudeplano.com.br\",\n            \"fax\": null,\n            \"logradouro\": \"AVENIDA T-9\",\n            \"modalidade\": \"Medicina de Grupo\",\n            \"nome_fantasia\": \"MAIS SAÚDE PLANO DE SAÚDE \",\n            \"numero\": \"735\",\n            \"razao_social\": \"MAIS SAÚDE PLANO DE SAÚDE LTDA\",\n            \"regiao_de_comercializacao\": 6,\n            \"registro_ans\": \"415065\",\n            \"representante\": \"ELIAS FRANCISCO DE OLIVEIRA\",\n            \"telefone\": \"31214600\",\n            \"uf\": \"GO\"\n        },\n        {\n            \"bairro\": \"ASA NORTE\",\n            \"cargo_representante\": \"PRESIDENTE\",\n            \"cep\": \"70730630\",\n            \"cidade\": \"Brasília\",\n            \"cnpj\": \"11828089000103\",\n            \"complemento\": \"BLOCO C, LOJA 48\",\n            \"data_registro_ans\": \"Thu, 12 Jan 2012 00:00:00 GMT\",\n            \"ddd\": \"61\",\n            \"endereco_eletronico\": \"negocios@evida.org.br\",\n            \"fax\": null,\n            \"logradouro\": \"SETOR DE HABITAÇÕES COLETIVAS GEMINADAS \",\n            \"modalidade\": \"Autogestão\",\n            \"nome_fantasia\": \"LUMINAR SAÚDE\",\n            \"numero\": \"QUADRA 704/705\",\n            \"razao_social\": \"LUMINAR SAÚDE - ASSOCIAÇÃO DE ASSISTÊNCIA À SAÚDE\",\n            \"regiao_de_comercializacao\": 4,\n            \"registro_ans\": \"418374\",\n            \"representante\": \"JORGE EDUARDO BRAGA NETO\",\n            \"telefone\": \"39668300\",\n            \"uf\": \"DF\"\n        },\n        {\n            \"bairro\": \"CAMBUCI\",\n            \"cargo_representante\": \"REPRESENTANTE JUNTO À ANS\",\n            \"cep\": \"01540020\",\n            \"cidade\": \"São Paulo\",\n            \"cnpj\": \"03849449000117\",\n            \"complemento\": null,\n            \"data_registro_ans\": \"Fri, 21 Jul 2000 00:00:00 GMT\",\n            \"ddd\": \"11\",\n            \"endereco_eletronico\": \"diretoria@maisazulsaude.com.br\",\n            \"fax\": \"33885010\",\n            \"logradouro\": \"RUA ALBUQUERQUE MARANHÃO\",\n            \"modalidade\": \"Medicina de Grupo\",\n            \"nome_fantasia\": \"CRUZ AZUL SAÚDE\",\n            \"numero\": \"72\",\n            \"razao_social\": \"ASSOCIAÇÃO ASSISTENCIAL DE SAÚDE SUPLEMENTAR CRUZ AZUL SAÚDE\",\n            \"regiao_de_comercializacao\": 4,\n            \"registro_ans\": \"411752\",\n            \"representante\": \"EDGAR CUCCOLO\",\n            \"telefone\": \"33885000\",\n            \"uf\": \"SP\"\n        },\n        {\n            \"bairro\": \"CENTRO\",\n            \"cargo_representante\": \"Diretor Presidente\",\n            \"cep\": \"20050900\",\n            \"cidade\": \"Rio de Janeiro\",\n            \"cnpj\": \"34844263000107\",\n            \"complemento\": \"SALA 501\",\n            \"data_registro_ans\": \"Wed, 11 Dec 2019 00:00:00 GMT\",\n            \"ddd\": \"21\",\n            \"endereco_eletronico\": \"governanca@eletrossaude.com.br\",\n            \"fax\": null,\n            \"logradouro\": \"RUA URUGUAIANA\",\n            \"modalidade\": \"Autogestão\",\n            \"nome_fantasia\": \"ELETROS-SAÚDE\",\n            \"numero\": \"174\",\n            \"razao_social\": \"ELETROS SAÚDE - ASSOCIAÇÃO DE ASSISTÊNCIA À SAÚDE\",\n            \"regiao_de_comercializacao\": null,\n            \"registro_ans\": \"422070\",\n            \"representante\": \"ROGÉRIO CARLOS LAMIM BRAZ\",\n            \"telefone\": \"21386000\",\n            \"uf\": \"RJ\"\n        },\n        {\n            \"bairro\": \"SAMAMBAIA\",\n            \"cargo_representante\": \"ADMINISTRADOR\",\n            \"cep\": \"83535000\",\n            \"cidade\": \"Campo Magro\",\n            \"cnpj\": \"02862447000103\",\n            \"complemento\": \"TERREO\",\n            \"data_registro_ans\": \"Thu, 17 Dec 1998 00:00:00 GMT\",\n            \"ddd\": \"41\",\n            \"endereco_eletronico\": \"nossasaude@nossasaude.com.br\",\n            \"fax\": \"32404700\",\n            \"logradouro\": \"RUA URSULA ERCOLE CUMIN\",\n            \"modalidade\": \"Medicina de Grupo\",\n            \"nome_fantasia\": \"NOSSA SAÚDE\",\n            \"numero\": \"211\",\n            \"razao_social\": \"NOSSA SAÚDE - OPERADORA PLANOS PRIVADOS DE ASSISTÊNCIA  À SAÚDE LTDA.\",\n            \"regiao_de_comercializacao\": 4,\n            \"registro_ans\": \"372609\",\n            \"representante\": \"DULCIMAR DE CONTO\",\n            \"telefone\": \"32404700\",\n            \"uf\": \"PR\"\n        }\n    ],\n    \"size\": 5,\n    \"total\": 278\n}\n\n ```\n\n---\n\n### **Script de teste**\n\nValidações automáticas com as seguintes funcionalidades:\n\n- Busca das variáveis do Postman (query, page, size).\n    \n- Verifica se os valores retornados na resposta correspondem aos parâmetros enviados.\n    \n- Garante que o número de resultados não ultrapassa o tamanho da página (size).\n    \n- Valida se os resultados contêm o termo de pesquisa (query) nos campos relevantes.\n    \n- Verifica se cada item da lista possui os campos esperados.\n    \n\n``` javascript\npm.test(\"Resposta válida e coerente com os parâmetros\", () => {\n    const response = pm.response.json();\n    const expectedQuery = pm.variables.get(\"query\");\n    const expectedPage = parseInt(pm.variables.get(\"page\"), 10);\n    const expectedSize = parseInt(pm.variables.get(\"size\"), 10);\n    pm.expect(response).to.be.an(\"object\");\n    pm.expect(response).to.have.property(\"results\").that.is.an(\"array\");\n    pm.expect(response).to.have.property(\"page\").that.is.a(\"number\");\n    pm.expect(response).to.have.property(\"size\").that.is.a(\"number\");\n    pm.expect(response).to.have.property(\"total\").that.is.a(\"number\");\n    pm.expect(response.page).to.equal(expectedPage);\n    pm.expect(response.size).to.equal(expectedSize);\n    pm.expect(response.results.length).to.be.at.most(expectedSize);\n    if (expectedQuery) {\n        response.results.forEach(item => {\n            const searchFields = [\n                item.nome_fantasia,\n                item.razao_social,\n                item.modalidade\n            ].join(\" \").toLowerCase();\n            pm.expect(searchFields).to.include(expectedQuery.toLowerCase());\n        });\n    }\n    response.results.forEach(item => {\n        pm.expect(item).to.have.property(\"bairro\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"cidade\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"cnpj\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"logradouro\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"modalidade\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"nome_fantasia\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"registro_ans\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"telefone\").that.is.a(\"string\");\n        pm.expect(item).to.have.property(\"uf\").that.is.a(\"string\");\n    });\n});\n\n ```"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "query",
+			"value": "SAUDE",
+			"type": "string"
+		},
+		{
+			"key": "page",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "size",
+			"value": "10",
+			"type": "string"
+		}
+	]
+}
