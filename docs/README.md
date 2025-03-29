@@ -1,4 +1,4 @@
-<h1 align="center" style="font-weight: bold;">Teste de nivelamento 🧩</h1>
+<h1 align="center" style="font-weight: bold;">Testes de nivelamento 🧩</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python">
@@ -33,20 +33,17 @@
 │   │   ├── pdfs/             # Anexos I e II
 │   │   ├── csv/              # CSV do Teste 2 e dados da ANS
 │   │   └── zip/              # Arquivos compactados
-│   ├── requirements.txt      # Dependências Python
 │   └── Dockerfile            # Dockerfile para o backend
 │
 ├── frontend/                 # Interface Vue.js (Teste 4)
 │   ├── src/
 │   │   ├── components/       # Componentes Vue
 │   │   ├── types/            # Interface de operadora
-│   │   ├── views/            # Páginas
-│   │   ├── router/           # Rotas
+│   │   ├── views/            # Página
+│   │   ├── router/           # Rota
 │   │   ├── assets/           # SCSS
 │   │   ├── plugins/          # Vuetify
 │   │   └── App.vue
-│   ├── package.json          # Dependências Vue.js
-│   ├── vite.config.js        # Configuração do Vite
 │   └── Dockerfile            # Dockerfile para o frontend
 │
 ├── docs/                     # Documentação
@@ -75,7 +72,7 @@ cd teste
 docker compose up -d --build
 ```
 
-> O container `preprocessing` leva em torno de 2 minutos para finalizar os processos de execução dos scripts.
+> O container `preprocessing` leva em torno de 2 minutos para finalizar a execução de todos os scripts.
 
 <h3>Resultado</h3>
 
